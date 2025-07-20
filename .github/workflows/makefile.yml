@@ -43,7 +43,7 @@ jobs:
     - name: 下载内核源码
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        git clone https://github.com/wu17481748/android_kernel_mtk6873 android-kernel
+        git clone https://github.com/fyhbauyg/android_kernel_mtk6873.git android-kernel
         cd android-kernel
 
 
@@ -51,7 +51,6 @@ jobs:
     - name: 更新 ksu
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        rm -rf KernelSU
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.9.5
 
                
@@ -66,8 +65,6 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$GITHUB_WORKSPACE/kernel_workspace/gcc64/bin:$GITHUB_WORKSPACE/kernel_workspace/gcc32/bin:$PATH
-        export KBUILD_BUILD_HOST=企鹅交流群:722651738
-        export KBUILD_BUILD_USER=kuan-jsbsbxjxh66
         make -s -j$(nproc --all) O=out ARCH=arm64 mtk6873_defconfig
         make -j$(nproc --all) CC="ccache clang" O=out ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi- LD=ld.lld
                 
@@ -80,6 +77,7 @@ jobs:
         sed -i 's!block=/dev/block/platform/omap/omap_hsmmc.0/by-name/boot;!block=auto;!g' AnyKernel3/anykernel.sh
         sed -i 's/is_slot_device=0;/is_slot_device=auto;/g' AnyKernel3/anykernel.sh
         cp android-kernel/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/
+        zip -r9 AnyKernel3-Kernel.zip AnyKernel3/* -x .git README.md *placeholder
         rm -rf AnyKernel3/.git* AnyKernel3/README.md
         
     
@@ -88,7 +86,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: 安卓12-OPPO-A92s内核-卡刷包
-        path: kernel_workspace/AnyKernel3/*
+        path: kernel_workspace/AnyKernel3-Kernel.zip
         
 
     - name: 上传编译内核
